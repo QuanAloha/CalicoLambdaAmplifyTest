@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calico Cat Encyclopedia</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav container">
+            <div class="nav__brand">
+                <h1 class="nav__title">🐱 Calico Cat Encyclopedia</h1>
+            </div>
+            <ul class="nav__menu" id="navMenu">
+                <li class="nav__item">
+                    <a href="#home" class="nav__link active" data-section="home">Home</a>
+                </li>
+                <li class="nav__item">
+                    <a href="#facts" class="nav__link" data-section="facts">Facts</a>
+                </li>
+                <li class="nav__item">
+                    <a href="#breeds" class="nav__link" data-section="breeds">Breeds</a>
+                </li>
+                <li class="nav__item">
+                    <a href="#gallery" class="nav__link" data-section="gallery">Gallery</a>
+                </li>
+            </ul>
+            <button class="nav__toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Home Section -->
+        <section id="home" class="section section--home active">
+            <div class="container">
+                <div class="hero">
+                    <div class="hero__content">
+                        <h1 class="hero__title">Discover the Amazing World of Calico Cats</h1>
+                        <p class="hero__description">
+                            Explore the fascinating genetics, history, and characteristics of these uniquely beautiful felines. 
+                            From their rare male genetics to their distinctive tri-color coats, calico cats are truly special.
+                        </p>
+                        <button class="btn btn--primary hero__cta" data-section="facts">Explore Facts</button>
+                    </div>
+                </div>
+                
+                <div class="stats">
+                    <h2 class="stats__title">Quick Facts</h2>
+                    <div class="stats__grid" id="statsGrid">
+                        <!-- Stats cards will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Facts Section -->
+        <section id="facts" class="section section--facts">
+            <div class="container">
+                <div class="section__header">
+                    <h2 class="section__title">Fascinating Facts</h2>
+                    <p class="section__description">Discover the incredible science and culture behind calico cats</p>
+                </div>
+                
+                <div class="facts-filter">
+                    <button class="filter-btn active" data-category="all">All Facts</button>
+                    <button class="filter-btn" data-category="genetics">Genetics</button>
+                    <button class="filter-btn" data-category="culture">Culture</button>
+                    <button class="filter-btn" data-category="personality">Personality</button>
+                </div>
+                
+                <div class="facts__grid" id="factsGrid">
+                    <!-- Facts cards will be populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Breeds Section -->
+        <section id="breeds" class="section section--breeds">
+            <div class="container">
+                <div class="section__header">
+                    <h2 class="section__title">Breeds with Calico Patterns</h2>
+                    <p class="section__description">Explore different cat breeds that can display the beautiful calico coat pattern</p>
+                </div>
+                
+                <div class="breeds__grid" id="breedsGrid">
+                    <!-- Breed cards will be populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section id="gallery" class="section section--gallery">
+            <div class="container">
+                <div class="section__header">
+                    <h2 class="section__title">Calico Pattern Gallery</h2>
+                    <p class="section__description">Explore the different types of calico coat patterns</p>
+                </div>
+                
+                <div class="gallery-filter">
+                    <button class="filter-btn active" data-type="all">All Patterns</button>
+                    <button class="filter-btn" data-type="traditional">Traditional</button>
+                    <button class="filter-btn" data-type="dilute">Dilute</button>
+                    <button class="filter-btn" data-type="caliby">Caliby</button>
+                </div>
+                
+                <div class="gallery__grid" id="galleryGrid">
+                    <!-- Gallery items will be populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Loading indicator -->
+    <div class="loading" id="loading">
+        <div class="loading__spinner"></div>
+        <p>Loading calico cat data...</p>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
