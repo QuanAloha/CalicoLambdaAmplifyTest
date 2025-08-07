@@ -1,0 +1,18 @@
+{
+    "name": "calico-cat-monorepo",
+    "version": "1.0.0",
+    "description": "Full-stack application about Calico cats",
+    "scripts": {
+        "install-frontend": "cd frontend && npm install",
+        "install-backend": "cd backend && pip install -r requirements.txt",
+        "install-all": "npm run install-frontend && npm run install-backend",
+        "dev-frontend": "cd frontend && npm start",
+        "dev-backend": "cd backend && uvicorn main:app --reload",
+        "build-frontend": "cd frontend && npm run build",
+        "deploy-backend": "cd backend && sam build && sam deploy"
+    },
+    "keywords": ["calico", "cats", "react", "fastapi", "aws", "monorepo"],
+    "author": "Your Name",
+    "license": "MIT",
+    "workspaces": ["frontend"]
+}

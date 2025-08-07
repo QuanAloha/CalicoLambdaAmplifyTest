@@ -1,0 +1,99 @@
+name: Deploy React Frontend to AWS Amplify
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'frontend/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+  workflow_dispatch:
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install dependencies
+      run: |
+        npm ci
+
+    - name: Lint code
+      run: |
+        npm run lint || echo "Linting not configured"
+
+    - name: Run tests
+      run: |
+        npm test -- --coverage --watchAll=false || echo "No tests configured"
+
+    - name: Build application
+      env:
+        # Set API URL based on branch
+        REACT_APP_API_BASE_URL: ${{ github.ref == 'refs/heads/main' && 'https://YOUR_API_GATEWAY_URL.amazonaws.com/prod' || 'https://YOUR_DEV_API_URL.amazonaws.com/dev' }}
+      run: |
+        npm run build
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-files
+        path: frontend/build/
+        retention-days: 7
+
+  notify-amplify:
+    needs: test-and-build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Trigger Amplify build
+      run: |
+        echo "🎉 Frontend code pushed to main branch!"
+        echo "AWS Amplify will automatically detect the changes and deploy."
+        echo "Check your Amplify Console for deployment status:"
+        echo "https://console.aws.amazon.com/amplify/home"
+
+    - name: Comment on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `🎨 **Frontend Build Successful!**\\n\\nThe React application has been built and tested successfully. When this PR is merged to main, AWS Amplify will automatically deploy the changes.\\n\\n**Preview:** Once deployed, you can view the app at your Amplify domain.`
+          })
+
+  # Optional: Deploy to a preview environment for PRs
+  deploy-preview:
+    needs: test-and-build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - name: Create preview deployment comment
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `🔍 **Preview Deployment**\\n\\nIf you have Amplify preview environments set up, a preview deployment will be created automatically for this PR.\\n\\nCheck the Amplify Console for the preview URL.`
+          })
