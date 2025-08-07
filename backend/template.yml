@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Calico Cat Encyclopedia API - FastAPI backend deployed on AWS Lambda
+
+# Global configuration
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Runtime: python3.11
+    Environment:
+      Variables:
+        # Add environment variables here if needed
+        LOG_LEVEL: INFO
+
+Parameters:
+  StageName:
+    Type: String
+    Default: prod
+    Description: API Gateway deployment stage name
+
+Resources:
+  # Lambda function
+  CalicoAPIFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${AWS::StackName}-calico-api"
+      CodeUri: .
+      Handler: main.handler
+      Description: "FastAPI backend for Calico Cat Encyclopedia"
+      Environment:
+        Variables:
+          STAGE: !Ref StageName
+      Events:
+        # API Gateway event
+        CalicoAPI:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CalicoApiGateway
+            Path: /{proxy+}
+            Method: ANY
+        # Root path
+        CalicoAPIRoot:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CalicoApiGateway
+            Path: /
+            Method: ANY
+
+  # API Gateway
+  CalicoApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub "${AWS::StackName}-calico-api"
+      StageName: !Ref StageName
+      Description: "API Gateway for Calico Cat Encyclopedia"
+      Cors:
+        AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"  # In production, replace with your frontend domain
+        MaxAge: "'600'"
+      EndpointConfiguration:
+        Type: EDGE
+      TracingConfig:
+        TracingEnabled: true
+
+  # CloudWatch Log Group
+  CalicoAPILogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${CalicoAPIFunction}"
+      RetentionInDays: 14
+
+  # IAM role for Lambda (automatically created by SAM, but we can customize it)
+  CalicoAPIFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: CalicoAPIPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*"
+
+Outputs:
+  CalicoApiUrl:
+    Description: "API Gateway endpoint URL for Calico Cat Encyclopedia"
+    Value: !Sub "https://${CalicoApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/"
+    Export:
+      Name: !Sub "${AWS::StackName}-api-url"
+
+  CalicoApiId:
+    Description: "API Gateway ID"
+    Value: !Ref CalicoApiGateway
+    Export:
+      Name: !Sub "${AWS::StackName}-api-id"
+
+  CalicoLambdaFunctionArn:
+    Description: "Lambda Function ARN"
+    Value: !GetAtt CalicoAPIFunction.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-function-arn"
+
+  CalicoDocsUrl:
+    Description: "API Documentation URL"
+    Value: !Sub "https://${CalicoApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/docs"
+
+  CalicoHealthCheckUrl:
+    Description: "API Health Check URL"
+    Value: !Sub "https://${CalicoApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/"
